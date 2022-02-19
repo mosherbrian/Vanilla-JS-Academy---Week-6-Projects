@@ -1,3 +1,1 @@
-# web-platform-zhj9cx
-
-[Edit on StackBlitz ⚡️](https://stackblitz.com/edit/web-platform-zhj9cx)
+**Vanilla JS Academy Week 6 Projects**
