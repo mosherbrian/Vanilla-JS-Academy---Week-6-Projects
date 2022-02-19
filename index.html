@@ -32,16 +32,16 @@
 
     <form id="save-me">
       <label for="name">Name</label>
-      <input type="text" name="name" id="name" />
+      <input type="text" name="name" id="name" class="autosave" />
 
       <label for="address">Address</label>
-      <input type="text" id="address" />
+      <input type="text" id="address" class="autosave" />
 
       <label for="email">Email</label>
-      <input type="email" id="email" />
+      <input type="email" id="email" class="autosave" />
 
       <label for="more">Additional thoughts?</label>
-      <textarea name="more" id="more"></textarea>
+      <textarea name="more" id="more" class="autosave"></textarea>
 
       <p>
         <button type="submit">Submit</button>
@@ -50,13 +50,39 @@
 
     <script>
       'use strict;';
-      function saveFormData(event) {
-        console.log(event.target.value);
+
+      let formAutosave = document.querySelector('#save-me');
+      formAutosave.addEventListener('submit', (event) => {
+        localStorage.removeItem('saved_form_data');
+        formAutosave.reset();
+      });
+
+      let textFields = formAutosave.querySelectorAll(':scope > .autosave');
+
+      function saveFormData() {
+        let savedDataArray = [];
+        for (textField of textFields) {
+          savedDataArray.push({
+            id: textField.id,
+            value: textField.value,
+          });
+        }
+        localStorage.setItem('saved_form_data', JSON.stringify(savedDataArray));
+        // console.log('Save: ' + localStorage.getItem('saved_form_data'));
       }
 
-      document
-        .querySelector('#save-me')
-        .addEventListener('input', saveFormData);
+      (function loadFormData(data) {
+        let savedData = localStorage.getItem(data);
+        if (!savedData) return;
+        // console.log('Load: ' + savedData);
+        let savedDataArray = JSON.parse(savedData);
+        // console.log('Parsed: ' + savedDataArray);
+        for (let elem of savedDataArray) {
+          document.getElementById(elem.id).value = elem.value;
+        }
+      })('saved_form_data');
+
+      formAutosave.addEventListener('input', saveFormData);
     </script>
   </body>
 </html>
