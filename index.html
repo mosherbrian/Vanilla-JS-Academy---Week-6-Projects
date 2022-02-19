@@ -35,10 +35,10 @@
       <input type="text" name="name" id="name" class="autosave" />
 
       <label for="address">Address</label>
-      <input type="text" id="address" class="autosave" />
+      <input type="text" name="address" id="address" class="autosave" />
 
       <label for="email">Email</label>
-      <input type="email" id="email" class="autosave" />
+      <input type="email" name="email" id="email" class="autosave" />
 
       <label for="more">Additional thoughts?</label>
       <textarea name="more" id="more" class="autosave"></textarea>
@@ -51,6 +51,27 @@
     <script>
       'use strict;';
 
+      /*!
+       * Serialize all form data into an object
+       * (c) 2021 Chris Ferdinandi, MIT License, https://gomakethings.com
+       * @param  {FormData} data The FormData object to serialize
+       * @return {String}        The serialized form data
+       */
+      function serialize(data) {
+        let obj = {};
+        for (let [key, value] of data) {
+          if (obj[key] !== undefined) {
+            if (!Array.isArray(obj[key])) {
+              obj[key] = [obj[key]];
+            }
+            obj[key].push(value);
+          } else {
+            obj[key] = value;
+          }
+        }
+        return obj;
+      }
+
       let formAutosave = document.querySelector('#save-me');
       formAutosave.addEventListener('submit', (event) => {
         localStorage.removeItem('saved_form_data');
@@ -60,14 +81,11 @@
       let textFields = formAutosave.querySelectorAll(':scope > .autosave');
 
       function saveFormData() {
-        let savedDataArray = [];
-        for (textField of textFields) {
-          savedDataArray.push({
-            id: textField.id,
-            value: textField.value,
-          });
-        }
-        localStorage.setItem('saved_form_data', JSON.stringify(savedDataArray));
+        let data = new FormData(formAutosave);
+        localStorage.setItem(
+          'saved_form_data',
+          JSON.stringify(serialize(data))
+        );
         // console.log('Save: ' + localStorage.getItem('saved_form_data'));
       }
 
@@ -75,10 +93,10 @@
         let savedData = localStorage.getItem(data);
         if (!savedData) return;
         // console.log('Load: ' + savedData);
-        let savedDataArray = JSON.parse(savedData);
-        // console.log('Parsed: ' + savedDataArray);
-        for (let elem of savedDataArray) {
-          document.getElementById(elem.id).value = elem.value;
+        let savedDataObj = JSON.parse(savedData);
+        // console.log('Parsed: ' + savedDataObj);
+        for (let [name, value] of Object.entries(savedDataObj)) {
+          document.querySelector(`[name="${name}"]`).value = value;
         }
       })('saved_form_data');
 
