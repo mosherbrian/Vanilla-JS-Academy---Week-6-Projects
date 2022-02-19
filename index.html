@@ -72,6 +72,26 @@
         return obj;
       }
 
+      // Show a status message
+      function showStatus(form, statusMsg) {
+        // Create a notification
+        let notification = document.createElement('div');
+        notification.setAttribute('aria-live', 'polite');
+
+        // Inject it into the DOM
+        form.append(notification);
+
+        // Add text after it's in the UI
+        setTimeout(function () {
+          notification.textContent = statusMsg;
+        }, 1);
+
+        // Remove it after 3 seconds
+        setTimeout(function () {
+          notification.remove();
+        }, 3000);
+      }
+
       let formAutosave = document.querySelector('#save-me');
       formAutosave.addEventListener('submit', (event) => {
         localStorage.removeItem('saved_form_data');
@@ -79,6 +99,7 @@
       });
 
       let textFields = formAutosave.querySelectorAll(':scope > .autosave');
+      let debounce;
 
       function saveFormData() {
         let data = new FormData(formAutosave);
@@ -87,6 +108,12 @@
           JSON.stringify(serialize(data))
         );
         // console.log('Save: ' + localStorage.getItem('saved_form_data'));
+        showStatus(formAutosave, 'Your form data was saved.');
+      }
+
+      function DebouncedSave() {
+        clearTimeout(debounce);
+        debounce = setTimeout(saveFormData, 300);
       }
 
       (function loadFormData(data) {
@@ -100,7 +127,7 @@
         }
       })('saved_form_data');
 
-      formAutosave.addEventListener('input', saveFormData);
+      formAutosave.addEventListener('input', DebouncedSave);
     </script>
   </body>
 </html>
